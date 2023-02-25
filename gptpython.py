@@ -1,14 +1,11 @@
-# First we install and import the OpenAI module
-!pip install openai
 import openai
+import time
 
-# Then we set up the API key that allows the program to use OpenAI
-# Do not forget to generate your own  key and mention below 
-openai.api_key = "Mention your API Key here from https://platform.openai.com/account/api-keys " 
+# Set OpenAI API key
+openai.api_key = "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"
 
-# We define a function that uses OpenAI to create follow-up questions
+# Function to generate a follow-up question
 def generate_followup(prompt):
-    # We ask OpenAI to generate a response to the prompt
     response = openai.Completion.create(
       engine="davinci",
       prompt=prompt,
@@ -20,18 +17,23 @@ def generate_followup(prompt):
       presence_penalty=0.5
     )
 
-    # We extract the response from OpenAI's output and return it
+    # Get the generated message from the OpenAI API response
     message = response.choices[0].text.strip()
     return message
 
-# We start a loop that keeps running until the program is stopped
+# Loop to continuously prompt for user input and generate follow-up questions
 while True:
-    # We ask the user to provide some input
     user_input = input("You: ")
+    prompt = "Ask a follow-up question to: \"" + user_input + "\""
 
-    # We use the input to generate a follow-up question using our function
-    followup = generate_followup("Ask a follow-up question to: \"" + user_input + "\"")
+    # Call generate_followup function to get the follow-up question
+    followup = generate_followup(prompt)
 
-    # We print the follow-up question to the screen
+    # Wait for the API response to be ready
+    while followup == prompt:
+        time.sleep(0.1)
+        response = openai.Completion.fetch(response["id"])
+        followup = response.choices[0].text.strip()
+
+    # Print the follow-up question
     print("ChatGPT:", followup)
-
